@@ -1,0 +1,43 @@
+services:
+  ollama:
+    image: ollama/ollama:latest
+    container_name: ollama
+    restart: unless-stopped
+    volumes:
+      - ./ollama_data:/root/.ollama
+    networks:
+      - backend-isolated # O Ollama SÓ fala com a interface
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - driver: nvidia
+              count: all
+              capabilities: [gpu]
+
+  open-webui:
+    image: ghcr.io/open-webui/open-webui:main
+    container_name: open-webui
+    restart: unless-stopped
+    ports:
+      - "3000:8080" # Porta para seu navegador acessar
+    environment:
+      - 'OLLAMA_BASE_URL=http://ollama:11434'
+      - 'WEBUI_SECRET_KEY=sua_chave_secreta'
+      - 'SCARF_NO_ANALYTICS=true'      # Disable analytics
+      - 'DO_NOT_TRACK=true'            # Respect DNT
+      - 'ANONYMIZED_TELEMETRY=False'   # Disable telemetry
+    volumes:
+      - ./open_webui_data:/app/backend/data
+    networks:
+      - frontend-access   # Conecta com você
+      - backend-isolated  # Conecta com o Ollama
+    depends_on:
+      - ollama
+
+networks:
+  frontend-access:
+    driver: bridge # Permite que você acesse via localhost:3000
+    #internal: true # Blocks internet access for the frontend (Privacy)
+  backend-isolated:
+    internal: true # Bloqueia qualquer saída do Ollama para a internet

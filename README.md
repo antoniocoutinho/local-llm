@@ -1,6 +1,6 @@
 # Local LLM Stack (Ollama + Open WebUI + Continue)
 
-This project sets up a local Large Language Model (LLM) environment using **Ollama** for the backend and **Open WebUI** for the frontend interface.
+This project sets up a local Large Language Model (LLM) environment using **Ollama** for the backend and **Open WebUI** for the frontend interface and Configure Continue for code assistance.
 
 ## Prerequisites
 - **Docker** and **Docker Compose** installed.
@@ -29,9 +29,16 @@ To run a model (e.g., `qwen2.5-coder:3b`, recommended for VRAM < 4GB):
 docker exec -it ollama ollama run qwen2.5-coder:3b
 ```
 VRAM (Est.) 1.3 GB
+
 ```bash
 docker exec -it ollama ollama run qwen2.5-coder:1.5b
 ```
+No VRAM 
+
+```bash
+docker exec -it ollama ollama run qwen2.5-coder:0.5b
+```
+
 
 ### 3. Access the Web Interface
 Open your browser to:
@@ -57,13 +64,13 @@ curl http://localhost:11434/api/generate -d '{
 ```bash
 code --install-extension Continue.continue
 ```
-Go to local config and add this configuration
+Go to Continue extention local config file `%USERPROFILE%\.continue\config.yaml` and add this suggested configuration
 
 ```yaml
 models:
   - name: "Ollama - Qwen 2.5 Coder 1.5B"
     provider: ollama
-    model: "qwen2.5-coder:1.5b"
+    model: "qwen2.5-coder:1.5b" # The this value from curl http://localhost:11434/api/tags
     apiBase: "http://localhost:11434"
 
   - name: "Ollama - Qwen 2.5 Coder 3Bs"
@@ -74,7 +81,7 @@ models:
 tabAutocompleteModel:
   title: "Fast Autocomplete"
   provider: ollama
-  model: "qwen2.5-coder:1.5b"
+  model: "qwen2.5-coder:1.5b" # The this value from curl http://localhost:11434/api/tags
   apiBase: "http://localhost:11434"
 
 # Configurações extras para performance em GPUs de entrada

@@ -3,10 +3,12 @@ services:
     image: ollama/ollama:latest
     container_name: ollama
     restart: unless-stopped
+    ports:
+      - "127.0.0.1:11434:11434" # Allows VS Code/Continue to access Ollama
     volumes:
       - ./ollama_data:/root/.ollama
     networks:
-      - backend-isolated # O Ollama SÓ fala com a interface
+      - isolated-network # No internet gateway
     deploy:
       resources:
         reservations:
@@ -20,24 +22,25 @@ services:
     container_name: open-webui
     restart: unless-stopped
     ports:
-      - "3000:8080" # Porta para seu navegador acessar
-    environment:
-      - 'OLLAMA_BASE_URL=http://ollama:11434'
-      - 'WEBUI_SECRET_KEY=sua_chave_secreta'
-      - 'SCARF_NO_ANALYTICS=true'      # Disable analytics
-      - 'DO_NOT_TRACK=true'            # Respect DNT
-      - 'ANONYMIZED_TELEMETRY=False'   # Disable telemetry
+      - "127.0.0.1:3000:8080" # Restricted access to your machine only
     volumes:
       - ./open_webui_data:/app/backend/data
+    environment:
+      - 'OLLAMA_BASE_URL=http://ollama:11434'
+      - 'WEBUI_SECRET_KEY=secret_key_123'
+      - 'ENABLE_RAG_WEB_SEARCH=False'
+      - 'CHECK_UPDATE=False'
+      - 'SCARF_ANALYTICS=False'
     networks:
-      - frontend-access   # Conecta com você
-      - backend-isolated  # Conecta com o Ollama
+      - isolated-network # Talks to Ollama
+      - public-bridge    # Allows you to access via browser
     depends_on:
       - ollama
 
 networks:
-  frontend-access:
-    driver: bridge # Permite que você acesse via localhost:3000
-    #internal: true # Blocks internet access for the frontend (Privacy)
-  backend-isolated:
-    internal: true # Bloqueia qualquer saída do Ollama para a internet
+  # Standard Bridge network for your WebUI access
+  public-bridge:
+    driver: bridge
+  # Internal Network: Ollama stays here, without access to the outside world
+  isolated-network:
+    #internal: true

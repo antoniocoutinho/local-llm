@@ -1,4 +1,4 @@
-# Local LLM Stack (Ollama + Open WebUI)
+# Local LLM Stack (Ollama + Open WebUI + Continue)
 
 This project sets up a local Large Language Model (LLM) environment using **Ollama** for the backend and **Open WebUI** for the frontend interface.
 
@@ -28,10 +28,62 @@ To run a model (e.g., `qwen2.5-coder:3b`, recommended for VRAM < 4GB):
 ```bash
 docker exec -it ollama ollama run qwen2.5-coder:3b
 ```
+VRAM (Est.) 1.3 GB
+```bash
+docker exec -it ollama ollama run qwen2.5-coder:1.5b
+```
 
 ### 3. Access the Web Interface
 Open your browser to:
 http://localhost:3000/
+
+### 4. Testing API
+
+```bash
+curl http://localhost:11434/api/tags
+```
+or
+
+```bash
+curl http://localhost:11434/api/generate -d '{
+  "model": "qwen2.5-coder:1.5b",
+  "prompt": "Write a hello world in Python",
+  "stream": false
+}'
+```
+
+## Install Code assitant extention
+
+```bash
+code --install-extension Continue.continue
+```
+Go to local config and add this configuration
+
+```yaml
+models:
+  - name: "Ollama - Qwen 2.5 Coder 1.5B"
+    provider: ollama
+    model: "qwen2.5-coder:1.5b"
+    apiBase: "http://localhost:11434"
+
+  - name: "Ollama - Qwen 2.5 Coder 3Bs"
+    provider: ollama
+    model: "qwen2.5-coder:3b"
+    apiBase: "http://localhost:11434"
+
+tabAutocompleteModel:
+  title: "Fast Autocomplete"
+  provider: ollama
+  model: "qwen2.5-coder:1.5b"
+  apiBase: "http://localhost:11434"
+
+# Configurações extras para performance em GPUs de entrada
+completionOptions:
+  temperature: 0.1
+  maxTokens: 512 # Reduzir um pouco ajuda a evitar picos de VRAM
+
+allowAnonymousTelemetry: false
+```
 
 ## Troubleshooting
 

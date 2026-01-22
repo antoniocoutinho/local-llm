@@ -14,6 +14,25 @@ In this configuration:
 - The **Interface (Open WebUI)** acts as a bridge. It receives your commands via the browser and passes them to Ollama on the isolated network.
 - Your code leaves your browser -> enters Open WebUI -> goes to Ollama. From there, it has nowhere to go.
 
+### Architecture Diagram
+
+```mermaid
+flowchart TD
+    subgraph Host ["Host Machine"]
+        Browser["Browser"]
+        VSCode["VS Code / Continue"]
+    end
+
+    subgraph Docker ["Docker Environment"]
+        WebUI["Open WebUI"]
+        Ollama["Ollama"]
+    end
+
+    Browser -- "http://localhost:3000" --> WebUI
+    VSCode -- "http://localhost:11434" --> Ollama
+    WebUI -- "isolated-network" --> Ollama
+```
+
 ## Getting Started
 
 ### 1. Start the Services
@@ -23,7 +42,7 @@ docker compose up -d
 ```
 
 ### 2. Download a Model
-In order to download this model the line `backend-isolated: internal: true` should be COMMENTED, after download the model UNCOMMENT and `docker compose up -d`
+In order to download this model the line `isolated-network: internal: true` should be COMMENTED, after download the model UNCOMMENT and `docker compose up -d`
 To run a model (e.g., `qwen2.5-coder:3b`, recommended for VRAM < 4GB):
 ```bash
 docker exec -it ollama ollama run qwen2.5-coder:3b
